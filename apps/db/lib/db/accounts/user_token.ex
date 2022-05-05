@@ -17,7 +17,7 @@ defmodule Db.Accounts.UserToken do
     field :token, :binary
     field :context, :string
     field :sent_to, :string
-    belongs_to :user, Db.Accounts.User
+    belongs_to :user, Db.Accounts.User, references: :user_uuid, type: :binary_id
 
     timestamps(updated_at: false)
   end
@@ -43,7 +43,7 @@ defmodule Db.Accounts.UserToken do
   """
   def build_session_token(user) do
     token = :crypto.strong_rand_bytes(@rand_size)
-    {token, %UserToken{token: token, context: "session", user_id: user.id}}
+    {token, %UserToken{token: token, context: "session", user_id: user.user_uuid}}
   end
 
   @doc """
@@ -90,7 +90,7 @@ defmodule Db.Accounts.UserToken do
        token: hashed_token,
        context: context,
        sent_to: sent_to,
-       user_id: user.id
+       user_id: user.user_uuid
      }}
   end
 
@@ -170,10 +170,10 @@ defmodule Db.Accounts.UserToken do
   Gets all tokens for the given user for the given contexts.
   """
   def user_and_contexts_query(user, :all) do
-    from t in UserToken, where: t.user_id == ^user.id
+    from t in UserToken, where: t.user_id == ^user.user_uuid
   end
 
   def user_and_contexts_query(user, [_ | _] = contexts) do
-    from t in UserToken, where: t.user_id == ^user.id and t.context in ^contexts
+    from t in UserToken, where: t.user_id == ^user.user_uuid and t.context in ^contexts
   end
 end

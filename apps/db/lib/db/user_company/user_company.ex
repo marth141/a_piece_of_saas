@@ -1,4 +1,4 @@
-defmodule Db.UsersCompanies do
+defmodule Db.UsersCompanies.UserCompany do
   use Ecto.Schema
   import Ecto.Changeset
 
