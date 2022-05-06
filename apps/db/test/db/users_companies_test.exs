@@ -8,13 +8,16 @@ defmodule Db.UsersCompaniesTest do
 
       {:ok, company} = Db.Companies.create_company(%{company_name: "big pimpin inc"})
 
-      changeset =
-        Db.UsersCompanies.UserCompany.changeset(%Db.UsersCompanies.UserCompany{}, %{
-          user_id: account.user_uuid,
-          company_id: company.company_uuid
-        })
+      assert {:ok, %Db.UsersCompanies.UserCompany{}} =
+               Db.UsersCompanies.create_users_companies_association(account, company)
 
-      assert {:ok, %Db.UsersCompanies.UserCompany{}} = Db.Repo.insert(changeset)
+      assert %Db.Accounts.User{companies: [%Db.Companies.Company{} | _companies_tail]} =
+               Db.Repo.get(Db.Accounts.User, account.user_uuid)
+               |> Db.Repo.preload(:companies)
+
+      assert %Db.Companies.Company{users: [%Db.Accounts.User{} | _users_tail]} =
+               Db.Repo.get(Db.Companies.Company, company.company_uuid)
+               |> Db.Repo.preload(:users)
     end
   end
 end
